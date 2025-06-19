@@ -11,7 +11,7 @@ namespace BadBuilder
         {
             List<DownloadItem> items = new()
             {
-                ("XeXMenu", "https://consolemods.org/wiki/images/3/35/XeXmenu_12.7z"),
+                ("XeXMenu", "https://consolemods.org/wiki/images/5/5c/XeXmenu_1.2.7z"),
                 ("Rock Band Blitz", "https://github.com/Pdawg-bytes/BadBuilder/releases/download/v0.10a/GameData.zip"),
                 ("Simple 360 NAND Flasher", "https://www.consolemods.org/wiki/images/f/ff/Simple_360_NAND_Flasher.7z"),
             };
