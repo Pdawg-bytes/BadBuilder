@@ -1,4 +1,4 @@
-## DirtyDiana: a BadBuilder Linux port
+## DirtyDiana: A BadBuilder Linux port
 DirtyDiana is a tool for creating a BadUpdate USB drive for the Xbox 360.
 
 ## License
