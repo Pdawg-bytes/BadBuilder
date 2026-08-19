@@ -78,10 +78,13 @@ internal static partial class BuilderApp
                     throw new InvalidOperationException("The selected default homebrew has no valid entry point.");
             }
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            bool canFormat = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+            if (!canFormat)
             {
-                Controls.WriteWarning("Drive formatting is currently only supported on Windows. Please format the drive manually to FAT32 before proceeding.");
+                Controls.WriteWarning("Drive formatting is currently only supported on Windows and macOS. Please format the drive manually to FAT32 before proceeding.");
                 Controls.Pause("Press enter after you have formatted the drive.");
+                Config.MountPoint = Controls.PromptText("Enter the mount point of your formatted drive (e.g. /media/usb)");
             }
             else
             {
