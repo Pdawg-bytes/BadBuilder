@@ -42,7 +42,7 @@ internal static partial class DiskService
     }
 
     [SupportedOSPlatform("windows")]
-    private static RawDiskStream OpenRawDiskForWrite(DiskInfo disk)
+    private static RawDiskStream OpenRawDiskForWriteWindows(DiskInfo disk)
     {
         int diskIndex                = int.Parse(disk.ID);
         List<VolumeLock> volumeLocks = LockAndDismountVolumes(diskIndex);
