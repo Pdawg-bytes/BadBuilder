@@ -46,6 +46,9 @@ internal static class Controls
     internal static void WriteSuccess(string message) => AnsiConsole.MarkupLine($"[{ToMarkupColor(AppTheme.GreenStyle.Foreground)}]{Escape("[+]")}[/] {message}");
 
 
+    internal static IReadOnlyList<MenuOption<T?>> OptionsWithBack<T>(IEnumerable<MenuOption<T?>> options) => [..options.Append(new MenuOption<T?>(default, "Back"))];
+
+
     internal static T PromptSelection<T>(string title, IReadOnlyList<MenuOption<T>> options, string? details = null) => AnsiConsole.Prompt(
         new SelectionPrompt<MenuOption<T>>()
             .Title($"[{ToMarkupColor(AppTheme.OrangeStyle.Foreground)}]{Escape(title)}[/]" +

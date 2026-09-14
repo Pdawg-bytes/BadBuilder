@@ -123,10 +123,12 @@ internal static partial class BuilderApp
             return;
         }
 
-        string selectedId = Controls.PromptSelection(
+        string? selectedId = Controls.PromptSelection(
             "Select a homebrew entry to remove", 
-            [..Config.Homebrew.Select(homebrew => new MenuOption<string>(homebrew.Artifact.ID, homebrew.Artifact.DisplayName, homebrew.SourcePath ?? "Included package"))]
+            [..Controls.OptionsWithBack(Config.Homebrew.Select(homebrew => new MenuOption<string?>(homebrew.Artifact.ID, homebrew.Artifact.DisplayName, homebrew.SourcePath ?? "Included package")))]
         );
+
+        if (selectedId is null) return;
 
         HomebrewEntry removed = Config.Homebrew.First(homebrew => homebrew.Artifact.ID == selectedId);
         Config.Homebrew.RemoveAll(homebrew => homebrew.Artifact.ID == selectedId);
@@ -149,8 +151,8 @@ internal static partial class BuilderApp
         }
 
         HomebrewEntry[] availableHomebrew = [..Config.Homebrew.Where(homebrew => homebrew.EntryPointRelativePath is not null)];
-        MenuOption<string>[] options      = [..availableHomebrew
-            .Select(homebrew => new MenuOption<string>(homebrew.Artifact.ID, homebrew.Artifact.DisplayName, homebrew.Artifact.Description))];
+        MenuOption<string?>[] options     = [..Controls.OptionsWithBack(availableHomebrew
+            .Select(homebrew => new MenuOption<string?>(homebrew.Artifact.ID, homebrew.Artifact.DisplayName, homebrew.Artifact.Description)))];
 
         if (options.Length == 0)
         {
@@ -159,7 +161,10 @@ internal static partial class BuilderApp
             return;
         }
 
-        string selectedLaunch = Controls.PromptSelection("Choose default launch program", options);
+        string? selectedLaunch = Controls.PromptSelection("Choose default launch program", options);
+
+        if (selectedLaunch is null) return;
+
         Config.LaunchHomebrew = availableHomebrew.FirstOrDefault(h => h.Artifact.ID == selectedLaunch);
     }
 

@@ -25,11 +25,16 @@ internal static partial class BuilderApp
             return $"{drive.Name} ({sizeGigabytes:0.00} GB) - {drive.Type}";
         }
 
-        Config.TargetDisk = Controls.PromptSelection(
+        DiskInfo? targetDisk = Controls.PromptSelection(
             "Choose target drive",
-            [..drives.Select(drive => new MenuOption<DiskInfo>(drive, FormatDriveLabel(drive)))],
+            [..Controls.OptionsWithBack(drives.Select(drive => new MenuOption<DiskInfo?>(drive, FormatDriveLabel(drive))))],
             "[bold white]All data will be lost on this drive.[/] Make sure to select the correct drive."
         );
+
+        if (targetDisk is not null)
+            Config.TargetDisk = targetDisk;
+        else
+            return;
     }
 
     private static void ConfigureExploit()
@@ -38,7 +43,7 @@ internal static partial class BuilderApp
 
         Config.SelectedExploit = Controls.PromptSelection(
             "Choose exploit",
-            [..ArtifactCatalog.Exploits.Select(pair => new MenuOption<ExploitOption>(pair.Key, pair.Value.DisplayName, pair.Value.Description))],
+            [..Controls.OptionsWithBack(ArtifactCatalog.Exploits.Select(pair => new MenuOption<ExploitOption>(pair.Key, pair.Value.DisplayName, pair.Value.Description)))],
             "Executes the console exploit and unlocks the hypervisor, allowing further unsigned code execution."
         );
     }
@@ -49,7 +54,7 @@ internal static partial class BuilderApp
 
         BootstrapOption selected = Controls.PromptSelection(
             "Choose post-exploit bootstrap",
-            [..ArtifactCatalog.Bootstraps.Select(pair => new MenuOption<BootstrapOption>(pair.Key, pair.Value.DisplayName, pair.Value.Description))],
+            [..Controls.OptionsWithBack(ArtifactCatalog.Bootstraps.Select(pair => new MenuOption<BootstrapOption>(pair.Key, pair.Value.DisplayName, pair.Value.Description)))],
             "The payload executed immediately after a successful hypervisor exploit to patch the kernel and initialize homebrew capabilities."
         );
 
