@@ -2,13 +2,13 @@
 BadBuilder is a tool for creating BadUpdate/ABadAvatar USB drives for the Xbox 360. It automates the process of formatting the USB drive, downloading required files, extracting them, adding homebrew, and downloading dashboard updates if needed.
 
 ## Features
-### USB Formatting (Windows Only)
+### USB Formatting (Windows & macOS)
 - Uses a custom FAT32 formatter that supports large USB drives (≥32GB).
 - Ensures compatibility with the Xbox 360.
 - Much more stable than the formatter in BadBuilder v1.
 
 > [!NOTE]  
-> Currently, the formatting feature is **Windows-only**. If you compile BadBuilder for another OS, it'll prompt you to manually format your target disk.
+> The formatting feature is supported on **Windows and macOS**. On other operating systems (e.g. Linux), BadBuilder will prompt you to manually format your target disk.
 
 ### Automatic File Downloading
 - Detects and downloads the latest required files automatically.

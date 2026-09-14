@@ -8,22 +8,27 @@ namespace BadBuilder.Services.Disks;
 
 internal static partial class DiskService
 {
-    internal static List<DiskInfo> EnumerateDisks() => InvokePlatformAction(EnumerateDisksWindows, null, null); // TODO: Implement for macOS and Linux
+    internal static List<DiskInfo> EnumerateDisks() => InvokePlatformAction(EnumerateDisksWindows, EnumerateDisksMacos, null);
 
     internal static string FormatFAT32(DiskInfo disk)
     {
         ArgumentNullException.ThrowIfNull(disk);
 
-        using RawDiskStream stream = OpenRawDiskForWrite(disk);
-        using Disk virtualDisk     = new(stream, Ownership.None);
+        {
+            using RawDiskStream stream = OpenRawDiskForWrite(disk);
+            using Disk virtualDisk     = new(stream, Ownership.None);
 
-        BiosPartitionTable.Initialize(virtualDisk, WellKnownPartitionType.WindowsFat);
+            BiosPartitionTable.Initialize(virtualDisk, WellKnownPartitionType.WindowsFat);
 
-        using FatFileSystem fs = FatFileSystem.FormatPartition(virtualDisk, 0, "BADUPDATE  ");
-        stream.Flush();
+            using FatFileSystem fs = FatFileSystem.FormatPartition(virtualDisk, 0, "BADUPDATE  ");
+            stream.Flush();
+        }
 
-        return InvokePlatformAction(ReassignWindows, null, null, disk); // TODO: Implement for macOS and Linux
+        return InvokePlatformAction(ReassignWindows, ReassignMacos, null, disk);
     }
+
+    private static RawDiskStream OpenRawDiskForWrite(DiskInfo disk)
+        => InvokePlatformAction(OpenRawDiskForWriteWindows, OpenRawDiskForWriteMacos, null, disk);
 
 
     private static string RunProcess(string fileName, string arguments)
