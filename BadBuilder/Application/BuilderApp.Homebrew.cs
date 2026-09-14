@@ -1,6 +1,6 @@
-using BadBuilder.Configuration;
-using BadBuilder.Services;
 using BadBuilder.UI;
+using BadBuilder.Services;
+using BadBuilder.Configuration;
 
 namespace BadBuilder.Application;
 

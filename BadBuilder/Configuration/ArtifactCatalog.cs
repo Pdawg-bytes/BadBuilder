@@ -14,6 +14,16 @@ internal static class ArtifactCatalog
             [ new InstallOperation(InstallOperationKind.CopyDirectory, ".", ".") ],
             ArtifactPriority.Exploit
         ),
+        [ExploitOption.ABadAvatarUpdate] = new
+        (
+            "exploit-abadavatarupdate",
+            "ABadAvatar 1.3",
+            "An unofficial version of the ABadAvatar exploit with improved speed",
+            "exploit",
+            new GitHubReleaseSource("bibarub", "Xbox360BadUpdate"),
+            [new InstallOperation(InstallOperationKind.CopyDirectory, ".", ".")],
+            ArtifactPriority.Exploit
+        ),
         [ExploitOption.BadUpdate] = new
         (
             "exploit-badupdate",

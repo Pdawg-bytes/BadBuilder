@@ -1,7 +1,7 @@
-using BadBuilder.Configuration;
-using BadBuilder.Services;
-using BadBuilder.Services.Disks;
 using BadBuilder.UI;
+using BadBuilder.Services;
+using BadBuilder.Configuration;
+using BadBuilder.Services.Disks;
 using System.Runtime.InteropServices;
 
 namespace BadBuilder.Application;
@@ -20,13 +20,13 @@ internal static partial class BuilderApp
 
             List<MenuOption<RootAction>> options =
             [
-                new MenuOption<RootAction>(RootAction.ConfigureDrive, "Target drive"),
-                new MenuOption<RootAction>(RootAction.ConfigureExploit, "Exploit"),
+                new MenuOption<RootAction>(RootAction.ConfigureDrive,     "Target drive"),
+                new MenuOption<RootAction>(RootAction.ConfigureExploit,   "Exploit"),
                 new MenuOption<RootAction>(RootAction.ConfigureBootstrap, "Post-exploit bootstrap"),
-                new MenuOption<RootAction>(RootAction.ConfigureHomebrew, "Homebrew"),
-                new MenuOption<RootAction>(RootAction.UpdateXbox, "Update Xbox Dashboard"),
-                new MenuOption<RootAction>(RootAction.Install, "Install"),
-                new MenuOption<RootAction>(RootAction.Exit, "Exit")
+                new MenuOption<RootAction>(RootAction.ConfigureHomebrew,  "Homebrew"),
+                new MenuOption<RootAction>(RootAction.UpdateXbox,         "Update Xbox Dashboard"),
+                new MenuOption<RootAction>(RootAction.Install,            "Install"),
+                new MenuOption<RootAction>(RootAction.Exit,               "Exit")
             ];
 
             if (Config.FirmwareUpdateEnabled)

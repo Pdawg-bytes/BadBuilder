@@ -54,6 +54,7 @@ If you encounter any problems, please create a new issue with details about your
 ### Credits
 - **Grimdoomer:** [BadUpdate](https://github.com/grimdoomer/Xbox360BadUpdate)
 - **Shutterbug2000:** [ABadAvatar](https://github.com/shutterbug2000/ABadAvatar)
+- **Bibarub:** [ABadAvatar 1.3](https://github.com/bibarub/Xbox360BadUpdate)
 - **InvoxiPlayGames:** [FreeMyXe](https://github.com/FreeMyXe/FreeMyXe)
 - **Byrom90:** [XeUnshackle](https://github.com/Byrom90/XeUnshackle)
 - **Swizzy:** [Simple 360 NAND Flasher](https://github.com/Swizzy/XDK_Projects)
