@@ -1,29 +1,12 @@
-﻿using DiscUtils.Raw;
-using DiscUtils.Fat;
-using DiscUtils.Streams;
-using System.Diagnostics;
-using DiscUtils.Partitions;
+﻿using System.Diagnostics;
 
 namespace BadBuilder.Services.Disks;
 
 internal static partial class DiskService
 {
-    internal static List<DiskInfo> EnumerateDisks() => InvokePlatformAction(EnumerateDisksWindows, null, null); // TODO: Implement for macOS and Linux
-
-    internal static string FormatFAT32(DiskInfo disk)
-    {
-        ArgumentNullException.ThrowIfNull(disk);
-
-        using RawDiskStream stream = OpenRawDiskForWrite(disk);
-        using Disk virtualDisk     = new(stream, Ownership.None);
-
-        BiosPartitionTable.Initialize(virtualDisk, WellKnownPartitionType.WindowsFat);
-
-        using FatFileSystem fs = FatFileSystem.FormatPartition(virtualDisk, 0, "BADUPDATE  ");
-        stream.Flush();
-
-        return InvokePlatformAction(ReassignWindows, null, null, disk); // TODO: Implement for macOS and Linux
-    }
+    internal static List<DiskInfo> EnumerateDisks() => InvokePlatformAction(EnumerateDisksWindows, null, EnumerateDisksLinux); // TODO: Implement for macOS
+    internal static string FormatFAT32(DiskInfo disk) => InvokePlatformAction(FormatFAT32Windows, null, FormatFAT32Linux, disk); // TODO: Implement for macOS
+    internal static void UnmountDisk(DiskInfo disk) => InvokePlatformAction(null, null, UnmountDiskLinux, disk); // Needed on Linux, it won't unmount the drive by itself
 
 
     private static string RunProcess(string fileName, string arguments)
@@ -46,8 +29,7 @@ internal static partial class DiskService
 
         return stdout;
     }
-
-
+    
     private static T InvokePlatformAction<T>(Func<T> windowsAction, Func<T> macosAction, Func<T> linuxAction)
     {
         if (OperatingSystem.IsWindows()) return windowsAction();
@@ -66,6 +48,28 @@ internal static partial class DiskService
         throw new PlatformNotSupportedException($"DiskService does not support this platform ({Environment.OSVersion.Platform}).");
     }
 
+    private static void InvokePlatformAction<TIn>(Action<TIn> windowsAction, Action<TIn> macosAction, Action<TIn> linuxAction, TIn input)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            windowsAction(input);
+            return;
+        }
+        
+        if (OperatingSystem.IsMacOS())
+        {
+            macosAction(input);
+            return;
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            linuxAction(input);
+            return;
+        }
+
+        throw new PlatformNotSupportedException($"DiskService does not support this platform ({Environment.OSVersion.Platform}).");
+    }
 
     private sealed class RawDiskStream(Stream inner, long length, Action? onDisposed = null) : Stream
     {

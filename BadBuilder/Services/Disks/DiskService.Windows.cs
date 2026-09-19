@@ -2,6 +2,10 @@
 using System.Runtime.Versioning;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
+using DiscUtils.Fat;
+using DiscUtils.Partitions;
+using DiscUtils.Raw;
+using DiscUtils.Streams;
 
 namespace BadBuilder.Services.Disks;
 
@@ -40,6 +44,22 @@ internal static partial class DiskService
 
         return disks;
     }
+    
+    [SupportedOSPlatform("windows")]
+    private static string FormatFAT32Windows(DiskInfo disk)
+    {
+        ArgumentNullException.ThrowIfNull(disk);
+
+        using RawDiskStream stream = OpenRawDiskForWrite(disk);
+        using Disk virtualDisk     = new(stream, Ownership.None);
+
+        BiosPartitionTable.Initialize(virtualDisk, WellKnownPartitionType.WindowsFat);
+
+        using FatFileSystem fs = FatFileSystem.FormatPartition(virtualDisk, 0, "BADUPDATE  ");
+        stream.Flush();
+
+        return ReassignDriveLetter(disk);
+    }
 
     [SupportedOSPlatform("windows")]
     private static RawDiskStream OpenRawDiskForWrite(DiskInfo disk)
@@ -74,7 +94,7 @@ internal static partial class DiskService
     }
 
     [SupportedOSPlatform("windows")]
-    private static string ReassignWindows(DiskInfo disk)
+    private static string ReassignDriveLetter(DiskInfo disk)
     {
         int diskIndex = int.Parse(disk.ID);
 
