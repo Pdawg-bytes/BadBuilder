@@ -78,9 +78,9 @@ internal static partial class BuilderApp
                     throw new InvalidOperationException("The selected default homebrew has no valid entry point.");
             }
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                Controls.WriteWarning("Drive formatting is currently only supported on Windows. Please format the drive manually to FAT32 before proceeding.");
+                Controls.WriteWarning("Drive formatting is currently only supported on Windows and Linux. Please format the drive manually to FAT32 before proceeding.");
                 Controls.Pause("Press enter after you have formatted the drive.");
             }
             else
@@ -161,6 +161,13 @@ internal static partial class BuilderApp
             }
 
             Controls.WriteSuccess("Your USB drive is ready for use.");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (Controls.Confirm("Unmount the drive?"))
+                {
+                    DiskService.UnmountDisk(Config.TargetDisk);
+                }
+            }
 
             Controls.Pause("Press enter to exit...");
             Environment.Exit(0);
