@@ -51,46 +51,11 @@ internal static partial class DiskService
     }
 
     [SupportedOSPlatform("linux")]
-    public static bool CreatePartition(DiskInfo disk)
-    {
-        using var process = Process.Start(new ProcessStartInfo
-        {
-            FileName = "/bin/fdisk",
-            Arguments = disk.DevicePath,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        });
-        if (process == null) return false;
-
-        using (StreamWriter writer = process.StandardInput)
-        {
-            writer.WriteLine("o");
-            writer.WriteLine("n");
-            writer.WriteLine("p");
-            writer.WriteLine("1");
-            writer.WriteLine("");
-            writer.WriteLine("");
-            writer.WriteLine("t");
-            writer.WriteLine("c");
-            writer.WriteLine("w");
-        }
-
-        process.WaitForExit();
-        return process.ExitCode == 0;
-    }
-
-    [SupportedOSPlatform("linux")]
     private static string FormatFAT32Linux(DiskInfo disk)
     {
         UnmountAll(disk.DevicePath);
         
-        if (!File.Exists("/bin/fdisk"))
-            throw new Exception(
-                "fdisk not found, installation cannot continue. Install fdisk using your package manager.");
-        if (!CreatePartition(disk)) throw new Exception("Could not create partition on target drive.");
+        RunProcess("/bin/sh", $"-c \"echo -e 'label: dos\\ntype=c' | sfdisk {disk.DevicePath}\"");
         
         if (!File.Exists("/bin/mkfs.fat"))
             throw new Exception(
