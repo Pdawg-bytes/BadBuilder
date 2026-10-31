@@ -470,7 +470,7 @@ install_bootstrap() {
             ;;
 
         "FreeMyXe")
-            local json; json="$(gh_release_json InvoxiPlayGames FreeMyXe)"
+            local json; json="$(gh_release_json FreeMyXe FreeMyXe)"
             local url; url="$(gh_asset_url "$json")"
             [[ -z "$url" ]] && { msg_err "Could not resolve download URL for FreeMyXe."; exit 1; }
             local tag; tag="$(gh_version_tag "$json")"
