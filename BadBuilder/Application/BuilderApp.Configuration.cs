@@ -1,6 +1,7 @@
 using BadBuilder.UI;
 using BadBuilder.Configuration;
 using BadBuilder.Services.Disks;
+using System.Runtime.InteropServices;
 
 namespace BadBuilder.Application;
 
@@ -22,7 +23,10 @@ internal static partial class BuilderApp
         static string FormatDriveLabel(DiskInfo drive)
         {
             double sizeGigabytes = drive.Size / 1024d / 1024d / 1024d;
-            return $"{drive.Name} ({sizeGigabytes:0.00} GB) - {drive.Type}";
+            string label = $"{drive.Name} ({sizeGigabytes:0.00} GB) - {drive.Type}";
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                label += $" [{drive.DevicePath}]";
+            return label;
         }
 
         DiskInfo? targetDisk = Controls.PromptSelection(
