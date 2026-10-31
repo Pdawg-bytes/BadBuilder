@@ -1,0 +1,29 @@
+Script criado em BadBuilder.sh. Para usar no Linux:
+
+
+chmod +x BadBuilder.sh
+sudo ./BadBuilder.sh
+
+Dependências necessárias (uma linha de instalação):
+
+Debian/Ubuntu:
+sudo apt install util-linux dosfstools parted curl jq unzip p7zip-full unrar
+
+Fedora/RHEL:
+sudo dnf install util-linux dosfstools parted curl jq unzip p7zip p7zip-plugins unar
+
+O que o script implementa (mesmo escopo do C#):
+
+Funcionalidade	Implementação
+TUI com cores ANSI		ASCII art + menus numerados
+Enumeração de discos		lsblk -J → mostra /dev/sdX, tamanho, tipo
+Formatação FAT32		parted (tabela MBR) + mkfs.fat -F 32 -n BADUPDATE
+Download do GitHub		curl + jq para API do GitHub com cache por versão
+Verificação SHA-256		sha256sum comparado com o hash do release
+Extração de arquivos		unzip / 7z / unrar/unar conforme extensão
+Exploits			BadUpdate, ABadAvatar, ABadAvatarUpdate
+Bootstraps			XeUnshackle (com <SUBFOLDER> resolve) + FreeMyXe
+Homebrew built-in		Aurora, XeXMenu, Simple 360 NAND Flasher
+Homebrew custom			Adiciona arquivo local, detecta entry point manual
+Auto-launch			Edita launch.ini com sed (somente XeUnshackle)
+Update dashboard		Download direto do servidor da Microsoft
