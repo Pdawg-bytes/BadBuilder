@@ -92,10 +92,10 @@ show_summary() {
     echo ""
 }
 
-msg_info()    { echo -e "${YELLOW}[*]${RESET} $*"; }
-msg_ok()      { echo -e "${GREEN}[+]${RESET} $*"; }
-msg_warn()    { echo -e "${ORANGE}[!]${RESET} $*"; }
-msg_err()     { echo -e "${RED}[-]${RESET} $*"; }
+msg_info()    { echo -e "${YELLOW}[*]${RESET} $*" >&2; }
+msg_ok()      { echo -e "${GREEN}[+]${RESET} $*" >&2; }
+msg_warn()    { echo -e "${ORANGE}[!]${RESET} $*" >&2; }
+msg_err()     { echo -e "${RED}[-]${RESET} $*" >&2; }
 
 pause() {
     local msg="${1:-Press Enter to continue...}"
@@ -309,9 +309,16 @@ gh_asset_url() {
 
 gh_version_tag() { echo "$1" | jq -r '.tag_name // "unknown"'; }
 
-parse_sha256_from_body() {
-    local body="$1"
-    echo "$body" | grep -oi 'sha256:[[:space:]]*[0-9a-fA-F]\{64\}' | grep -oi '[0-9a-fA-F]\{64\}' | head -1 | tr '[:lower:]' '[:upper:]'
+sha_from_json() {
+    # Extract SHA-256 from a release JSON body; safe with empty/invalid JSON.
+    local json="$1"
+    [[ -z "$json" ]] && { echo ""; return 0; }
+    echo "$json" | jq -r '.body // ""' 2>/dev/null \
+        | grep -oi 'sha256:[[:space:]]*[0-9a-fA-F]\{64\}' \
+        | grep -oi '[0-9a-fA-F]\{64\}' \
+        | head -1 \
+        | tr '[:lower:]' '[:upper:]' \
+        || echo ""
 }
 
 # Download with progress, skip if cached and SHA matches
@@ -395,9 +402,10 @@ install_exploit() {
         "BadUpdate")
             local json; json="$(gh_release_json grimdoomer Xbox360BadUpdate)"
             local url; url="$(gh_asset_url "$json")"
+            [[ -z "$url" ]] && { msg_err "Could not resolve download URL for BadUpdate."; exit 1; }
             local tag; tag="$(gh_version_tag "$json")"
             local filename; filename="$(basename "$url")"
-            local sha; sha="$(parse_sha256_from_body "$(echo "$json" | jq -r '.body // ""')")"
+            local sha; sha="$(sha_from_json "$json")"
             local archive; archive="$(download_artifact "exploit-badupdate" "$url" "$filename" "$tag" "$sha")"
             local stage="${STAGING_DIR}/exploit-badupdate"
             rm -rf "$stage"; extract_archive "$archive" "$stage"
@@ -409,9 +417,10 @@ install_exploit() {
         "ABadAvatar")
             local json; json="$(gh_release_json shutterbug2000 ABadAvatar)"
             local url; url="$(gh_asset_url "$json")"
+            [[ -z "$url" ]] && { msg_err "Could not resolve download URL for ABadAvatar."; exit 1; }
             local tag; tag="$(gh_version_tag "$json")"
             local filename; filename="$(basename "$url")"
-            local sha; sha="$(parse_sha256_from_body "$(echo "$json" | jq -r '.body // ""')")"
+            local sha; sha="$(sha_from_json "$json")"
             local archive; archive="$(download_artifact "exploit-abadavatar" "$url" "$filename" "$tag" "$sha")"
             local stage="${STAGING_DIR}/exploit-abadavatar"
             rm -rf "$stage"; extract_archive "$archive" "$stage"
@@ -422,9 +431,10 @@ install_exploit() {
         "ABadAvatarUpdate")
             local json; json="$(gh_release_json bibarub Xbox360BadUpdate)"
             local url; url="$(gh_asset_url "$json")"
+            [[ -z "$url" ]] && { msg_err "Could not resolve download URL for ABadAvatar 1.3."; exit 1; }
             local tag; tag="$(gh_version_tag "$json")"
             local filename; filename="$(basename "$url")"
-            local sha; sha="$(parse_sha256_from_body "$(echo "$json" | jq -r '.body // ""')")"
+            local sha; sha="$(sha_from_json "$json")"
             local archive; archive="$(download_artifact "exploit-abadavatarupdate" "$url" "$filename" "$tag" "$sha")"
             local stage="${STAGING_DIR}/exploit-abadavatarupdate"
             rm -rf "$stage"; extract_archive "$archive" "$stage"
@@ -442,9 +452,10 @@ install_bootstrap() {
         "XeUnshackle")
             local json; json="$(gh_release_json Byrom90 XeUnshackle)"
             local url; url="$(gh_asset_url "$json")"
+            [[ -z "$url" ]] && { msg_err "Could not resolve download URL for XeUnshackle."; exit 1; }
             local tag; tag="$(gh_version_tag "$json")"
             local filename; filename="$(basename "$url")"
-            local sha; sha="$(parse_sha256_from_body "$(echo "$json" | jq -r '.body // ""')")"
+            local sha; sha="$(sha_from_json "$json")"
             local archive; archive="$(download_artifact "bootstrap-xeunshackle" "$url" "$filename" "$tag" "$sha")"
             local stage="${STAGING_DIR}/bootstrap-xeunshackle"
             rm -rf "$stage"; extract_archive "$archive" "$stage"
@@ -459,11 +470,12 @@ install_bootstrap() {
             ;;
 
         "FreeMyXe")
-            local json; json="$(gh_release_json FreeMyXe FreeMyXe)"
+            local json; json="$(gh_release_json InvoxiPlayGames FreeMyXe)"
             local url; url="$(gh_asset_url "$json")"
+            [[ -z "$url" ]] && { msg_err "Could not resolve download URL for FreeMyXe."; exit 1; }
             local tag; tag="$(gh_version_tag "$json")"
             local filename; filename="$(basename "$url")"
-            local sha; sha="$(parse_sha256_from_body "$(echo "$json" | jq -r '.body // ""')")"
+            local sha; sha="$(sha_from_json "$json")"
             local archive; archive="$(download_artifact "bootstrap-freemyxe" "$url" "$filename" "$tag" "$sha")"
             local stage="${STAGING_DIR}/bootstrap-freemyxe"
             rm -rf "$stage"; extract_archive "$archive" "$stage"
