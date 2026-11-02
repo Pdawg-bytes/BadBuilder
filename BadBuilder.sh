@@ -373,6 +373,29 @@ download_artifact() {
     echo "$out_file"
 }
 
+# ── Eject helper ─────────────────────────────────────────────────────────────
+eject_drive() {
+    local dev="$1"     # e.g. /dev/sdb
+    local mnt="$2"     # e.g. /tmp/badbuilder_sdb
+
+    msg_info "Sincronizando dados no disco..."
+    sync
+
+    msg_info "Desmontando o pendrive..."
+    umount "$mnt" 2>/dev/null || true
+    rmdir  "$mnt" 2>/dev/null || true
+    MOUNT_POINT=""
+
+    # Try to power off / eject the block device so the OS releases it cleanly
+    if command -v udisksctl &>/dev/null; then
+        udisksctl power-off -b "$dev" 2>/dev/null && return
+    fi
+    if command -v eject &>/dev/null; then
+        eject "$dev" 2>/dev/null && return
+    fi
+    # No eject tool — drive is unmounted and safe to physically remove
+}
+
 # ── Install operation helpers ─────────────────────────────────────────────────
 
 # Copy all contents of $src_dir into $dst_dir (recursive merge)
@@ -424,7 +447,10 @@ install_exploit() {
             local archive; archive="$(download_artifact "exploit-abadavatar" "$url" "$filename" "$tag" "$sha")"
             local stage="${STAGING_DIR}/exploit-abadavatar"
             rm -rf "$stage"; extract_archive "$archive" "$stage"
-            copy_dir_contents "$stage" "$usb"
+            # If archive wraps content in a top-level folder, descend into it
+            local subdir; subdir="$(first_subdir "$stage")"
+            local src_dir="$stage"; [[ -n "$subdir" ]] && src_dir="$subdir"
+            copy_dir_contents "$src_dir" "$usb"
             msg_ok "ABadAvatar exploit installed."
             ;;
 
@@ -438,7 +464,10 @@ install_exploit() {
             local archive; archive="$(download_artifact "exploit-abadavatarupdate" "$url" "$filename" "$tag" "$sha")"
             local stage="${STAGING_DIR}/exploit-abadavatarupdate"
             rm -rf "$stage"; extract_archive "$archive" "$stage"
-            copy_dir_contents "$stage" "$usb"
+            # If archive wraps content in a top-level folder, descend into it
+            local subdir; subdir="$(first_subdir "$stage")"
+            local src_dir="$stage"; [[ -n "$subdir" ]] && src_dir="$subdir"
+            copy_dir_contents "$src_dir" "$usb"
             msg_ok "ABadAvatar 1.3 exploit installed."
             ;;
     esac
@@ -905,12 +934,26 @@ menu_install() {
         echo "  Drive:      $TARGET_DISK_NAME ($TARGET_DISK_PATH)"
     } > "${MOUNT_POINT}/info.txt"
 
-    # 4. Sync
-    sync
+    # 4. Eject (sync + umount + power-off)
+    local _dev="$TARGET_DISK_PATH"
+    local _mnt="$MOUNT_POINT"
+    eject_drive "$_dev" "$_mnt"
+
+    # 5. Success banner
     echo ""
-    msg_ok "USB drive is ready! Mounted at: $MOUNT_POINT"
-    echo -e "${GRAY}Safely eject with: umount ${MOUNT_POINT}${RESET}"
-    pause "Press Enter to exit..."
+    echo -e "${GREEN}┌──────────────────────────────────────────────────────────────┐${RESET}"
+    echo -e "${GREEN}│                                                              │${RESET}"
+    echo -e "${GREEN}│   ✓  PROCESSO CONCLUÍDO COM SUCESSO!                         │${RESET}"
+    echo -e "${GREEN}│                                                              │${RESET}"
+    echo -e "${GREEN}│   O pendrive está pronto para uso no Xbox 360.               │${RESET}"
+    echo -e "${GREEN}│   O dispositivo foi desmontado — pode removê-lo com          │${RESET}"
+    echo -e "${GREEN}│   segurança do computador.                                   │${RESET}"
+    echo -e "${GREEN}│                                                              │${RESET}"
+    printf  "${GREEN}│   Drive: %-52s│${RESET}\n" "${_dev}"
+    echo -e "${GREEN}│                                                              │${RESET}"
+    echo -e "${GREEN}└──────────────────────────────────────────────────────────────┘${RESET}"
+    echo ""
+    pause "Pressione Enter para sair..."
     exit 0
 }
 
